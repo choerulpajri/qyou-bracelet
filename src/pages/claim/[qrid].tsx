@@ -1,14 +1,23 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth'; // Import yang benar
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, getDocs, query, where, collection } from 'firebase/firestore';
+
+// Interface untuk data pengguna
+interface UserProfile {
+  uid: string;
+  qrid: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
 
 export default function ClaimPage() {
   const router = useRouter();
   const { qrid } = router.query;
 
-  // State untuk simpan data form
+  // State untuk form
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,10 +26,10 @@ export default function ClaimPage() {
 
   // State untuk loading dan error
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  // State untuk data profil user (null jika belum ada)
-  const [userProfile, setUserProfile] = useState<any>(null);
+  // State untuk data user (dengan tipe jelas)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // Cek apakah QR ID sudah diklaim
   useEffect(() => {
@@ -32,12 +41,11 @@ export default function ClaimPage() {
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-          // Jika sudah ada, ambil data profil user
           const userDoc = snapshot.docs[0];
-          setUserProfile(userDoc.data());
+          setUserProfile(userDoc.data() as UserProfile);
         }
         setLoading(false);
-      } catch (err) {
+      } catch (_err) {
         setError('Gagal memeriksa QR ID.');
         setLoading(false);
       }
@@ -46,19 +54,18 @@ export default function ClaimPage() {
     checkQR();
   }, [router.isReady, qrid]);
 
-  // Fungsi untuk handle input form
+  // Handle input form
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Fungsi submit form daftar
+  // Submit form daftar
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError(null);
     setLoading(true);
 
     try {
-      // Daftarkan user di Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
@@ -66,7 +73,7 @@ export default function ClaimPage() {
       );
       const user = userCredential.user;
 
-      // Simpan data user di Firestore
+      // Simpan ke Firestore
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         qrid,
@@ -75,7 +82,7 @@ export default function ClaimPage() {
         createdAt: new Date().toISOString(),
       });
 
-      // Arahkan ke halaman profil
+      // Redirect
       router.push(`/u/${qrid}`);
     } catch (err: any) {
       setError(err.message || 'Gagal mendaftar.');
