@@ -1,0 +1,40 @@
+
+.body {
+  max-width: 600px;
+  max-height: 1000px; /* Maksimal lebar konten */
+  margin: 40px auto; /* Pusatkan konten */
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #ffffff;
+  padding: 50px;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Bayangan halus */
+}
+
+h1 {
+  font-size: 2rem; /* Ukuran font untuk judul */
+  color: #333; /* Warna teks judul */
+  text-align: center;
+}
+
+p {
+  font-size: 1rem; /* Ukuran font untuk paragraf */
+  color: #555; /* Warna teks paragraf */
+}
+
+.tabel_data {
+  margin-top: 20px; /* Jarak atas untuk bagian profil */
+  padding: 15px; /* Padding di dalam bagian profil */
+  border: 1px solid #e0e0e0; /* Garis batas abu-abu */
+  border-radius: 25px; /* Sudut membulat untuk bagian profil */
+  background-color: #dddfe9; /* Warna latar belakang bagian profil */
+}
+
+.profile p {
+  margin: 10px 0; /* Jarak vertikal antar paragraf dalam profil */
+}
+
+strong {
+  color: #333; /* Warna teks untuk elemen strong */
+}
