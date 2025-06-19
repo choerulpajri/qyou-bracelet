@@ -7,13 +7,40 @@ import { db } from '@/lib/firebase'
 import Head from 'next/head'
 import Image from 'next/image'
 
+// Interface untuk data profil
+interface UserProfile {
+  name?: string;
+  photoURL?: string;
+  bio?: string;
+  usia?: string;
+  tinggal?: string;
+  lahir?: string;
+  whatsapp?: string;
+  instagram?: string;
+  tiktok?: string;
+  facebook?: string;
+  tweet?: string;
+  favoriteAnimal?: string;
+  favoriteBook?: string;
+  favoriteSport?: string;
+  favoriteMovie?: string;
+  favoriteSinger?: string;
+  favoriteSong?: string;
+  favoriteColor?: string;
+  favoriteFood?: string;
+  favoriteDrink?: string;
+}
+
 export default function PublicProfile() {
   const router = useRouter()
   const { id } = router.query
-  const [profile, setProfile] = useState<any>(null)
+
+  // State dengan tipe jelas
+  const [profile, setProfile] = useState<Partial<UserProfile> | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
+  // Fetch profil dari Firestore
   useEffect(() => {
     if (!router.isReady || !id) return
 
@@ -23,7 +50,7 @@ export default function PublicProfile() {
         const snapshot = await getDocs(q)
 
         if (!snapshot.empty) {
-          setProfile(snapshot.docs[0].data())
+          setProfile(snapshot.docs[0].data() as UserProfile)
         } else {
           setNotFound(true)
         }
@@ -38,24 +65,26 @@ export default function PublicProfile() {
     fetchProfile()
   }, [router.isReady, id])
 
-  if (loading)
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-orange-900 text-white">
         Memuat profil...
       </div>
     )
+  }
 
-  if (notFound)
+  if (notFound) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-orange-900 text-white">
         Profil tidak ditemukan.
       </div>
     )
+  }
 
   return (
     <>
       <Head>
-        <title>All About Me - {profile.name}</title>
+        <title>All About Me - {profile?.name || 'User'}</title>
       </Head>
 
       {/* Background Stars */}
@@ -86,16 +115,17 @@ export default function PublicProfile() {
           <section className="flex flex-col items-center">
             <div className="profile-photo-container mb-4 relative overflow-hidden rounded-full border-4 border-dashed border-white shadow-lg transition-transform duration-300 hover:scale-105 hover:rotate-6">
               <img
-                src={profile.photoURL || '/default.jpg'}
+                src={profile?.photoURL || '/default.jpg'}
                 alt="Foto Profil"
                 className="profile-photo object-cover w-32 h-32"
                 onError={(e) => {
-                  e.currentTarget.src = '/default.jpg'
-                }}
+                const target = e.target as HTMLImageElement;
+                target.src = '/default.jpg';
+               }}
               />
             </div>
             <p className="mt-2 text-2xl user-input caption-bounce font-semibold">
-              {profile.name || 'Anonim'}
+              {profile?.name || 'Anonim'}
             </p>
           </section>
 
@@ -106,10 +136,10 @@ export default function PublicProfile() {
               About Me
             </h2>
             <ul className="space-y-2 text-lg">
-              <li>Nama: <span className="user-input">{profile.name}</span></li>
-              <li>Usia: <span className="user-input">{profile.usia}</span></li>
-              <li>Tinggal di: <span className="user-input">{profile.tinggal}</span></li>
-              <li>Tanggal Lahir: <span className="user-input">{profile.lahir}</span></li>
+              <li>Nama: <span className="user-input">{profile?.name}</span></li>
+              <li>Usia: <span className="user-input">{profile?.usia}</span></li>
+              <li>Tinggal di: <span className="user-input">{profile?.tinggal}</span></li>
+              <li>Tanggal Lahir: <span className="user-input">{profile?.lahir}</span></li>
             </ul>
           </section>
 
@@ -120,15 +150,15 @@ export default function PublicProfile() {
               My Social Media
             </h2>
             <ul className="space-y-3 text-lg">
-              {profile.whatsapp && (
+              {profile?.whatsapp && (
                 <li className="flex items-center gap-2 user-input">
                   <Image src="/icons/whatsapp.svg" width={20} height={20} alt="whatsapp" />
-                  <a href={`${profile.whatsapp}`}  target="_blank" rel="noopener noreferrer">
+                  <a href={profile.whatsapp} target="_blank" rel="noopener noreferrer">
                     {profile.whatsapp}
                   </a>
                 </li>
               )}
-              {profile.instagram && (
+              {profile?.instagram && (
                 <li className="flex items-center gap-2 user-input">
                   <Image src="/icons/instagram.svg" width={20} height={20} alt="Instagram" />
                   <a href={`https://instagram.com/${profile.instagram}`}  target="_blank" rel="noopener noreferrer">
@@ -136,7 +166,7 @@ export default function PublicProfile() {
                   </a>
                 </li>
               )}
-              {profile.tiktok && (
+              {profile?.tiktok && (
                 <li className="flex items-center gap-2 user-input">
                   <Image src="/icons/tiktok.svg" width={20} height={20} alt="TikTok" />
                   <a href={`https://tiktok.com/@${profile.tiktok}`}  target="_blank" rel="noopener noreferrer">
@@ -144,7 +174,7 @@ export default function PublicProfile() {
                   </a>
                 </li>
               )}
-              {profile.facebook && (
+              {profile?.facebook && (
                 <li className="flex items-center gap-2 user-input">
                   <Image src="/icons/facebook.svg" width={20} height={20} alt="Facebook" />
                   <a href={`https://facebook.com/${profile.facebook}`}  target="_blank" rel="noopener noreferrer">
@@ -152,7 +182,7 @@ export default function PublicProfile() {
                   </a>
                 </li>
               )}
-              {profile.tweet && (
+              {profile?.tweet && (
                 <li className="flex items-center gap-2 user-input">
                   <Image src="/icons/twitter.svg" width={20} height={20} alt="Twitter" />
                   <a href={`https://twitter.com/${profile.tweet}`}  target="_blank" rel="noopener noreferrer">
@@ -170,15 +200,15 @@ export default function PublicProfile() {
               My Top List
             </h2>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-lg">
-              <div><dt>Animal:</dt><dd className="user-input">{profile.favoriteAnimal}</dd></div>
-              <div><dt>Buku:</dt><dd className="user-input">{profile.favoriteBook}</dd></div>
-              <div><dt>Olahraga:</dt><dd className="user-input">{profile.favoriteSport}</dd></div>
-              <div><dt>Film:</dt><dd className="user-input">{profile.favoriteMovie}</dd></div>
-              <div><dt>Penyanyi:</dt><dd className="user-input">{profile.favoriteSinger}</dd></div>
-              <div><dt>Lagu:</dt><dd className="user-input">{profile.favoriteSong}</dd></div>
-              <div><dt>Warna:</dt><dd className="user-input">{profile.favoriteColor}</dd></div>
-              <div><dt>Makanan:</dt><dd className="user-input">{profile.favoriteFood}</dd></div>
-              <div><dt>Minuman:</dt><dd className="user-input">{profile.favoriteDrink}</dd></div>
+              <div><dt>Animal:</dt><dd className="user-input">{profile?.favoriteAnimal}</dd></div>
+              <div><dt>Buku:</dt><dd className="user-input">{profile?.favoriteBook}</dd></div>
+              <div><dt>Olahraga:</dt><dd className="user-input">{profile?.favoriteSport}</dd></div>
+              <div><dt>Film:</dt><dd className="user-input">{profile?.favoriteMovie}</dd></div>
+              <div><dt>Penyanyi:</dt><dd className="user-input">{profile?.favoriteSinger}</dd></div>
+              <div><dt>Lagu:</dt><dd className="user-input">{profile?.favoriteSong}</dd></div>
+              <div><dt>Warna:</dt><dd className="user-input">{profile?.favoriteColor}</dd></div>
+              <div><dt>Makanan:</dt><dd className="user-input">{profile?.favoriteFood}</dd></div>
+              <div><dt>Minuman:</dt><dd className="user-input">{profile?.favoriteDrink}</dd></div>
             </dl>
           </section>
         </div>
@@ -189,7 +219,6 @@ export default function PublicProfile() {
         .font-handwritten {
           font-family: 'Dancing Script', cursive;
         }
-
         .hand-drawn-border {
           border: 4px dashed white;
           border-radius: 1.5rem;
@@ -199,12 +228,10 @@ export default function PublicProfile() {
             0 0 20px rgba(255, 121, 36, 0.5);
           animation: subtleWiggle 5s infinite ease-in-out alternate;
         }
-
         @keyframes subtleWiggle {
           0% { transform: rotate(-0.2deg); }
           100% { transform: rotate(0.2deg); }
         }
-
         .title-large {
           font-size: 2rem;
           letter-spacing: 0.2em;
@@ -216,7 +243,6 @@ export default function PublicProfile() {
           font-weight: bold;
           text-align: center;
         }
-
         .user-input {
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -224,12 +250,10 @@ export default function PublicProfile() {
             0 0 1px rgba(255, 153, 36, 0.8),
             0 0 3px rgba(255, 121, 36, 0.4);
         }
-
         .user-input a {
           color: #ffcc66;
           text-decoration: underline;
         }
-
         .profile-photo-container {
           width: 120px;
           height: 120px;
@@ -239,34 +263,28 @@ export default function PublicProfile() {
           box-shadow: 0 8px 24px rgba(255, 121, 36, 0.6);
           transition: transform 0.35s ease;
         }
-
         .profile-photo-container:hover {
           transform: rotateZ(6deg) scale(1.05);
           box-shadow: 0 10px 32px #f97316, inset 0 0 44px rgba(255, 255, 255, 0.85);
         }
-
         .profile-photo {
           width: 100%;
           height: 100%;
           object-fit: cover;
         }
-
         .caption-bounce {
           animation: bounceText 3s ease-in-out infinite;
         }
-
         @keyframes bounceText {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-6px); }
         }
-
         .decorative-star {
           display: inline-block;
           width: 25px;
           height: 20px;
           position: relative;
         }
-
         .decorative-star::before,
         .decorative-star::after {
           content: '';
@@ -277,21 +295,18 @@ export default function PublicProfile() {
           border-radius: 1px;
           transform-origin: center;
         }
-
         .decorative-star::before {
           width: 2px;
           height: 100%;
           transform: translate(-50%, -50%) rotate(45deg);
           box-shadow: 0 0 4px orange;
         }
-
         .decorative-star::after {
           width: 2px;
           height: 100%;
           transform: translate(-50%, -50%) rotate(-45deg);
           box-shadow: 0 0 4px orange;
         }
-
         .handwritten-title {
           font-size: 2.2rem;
           color: transparent;
