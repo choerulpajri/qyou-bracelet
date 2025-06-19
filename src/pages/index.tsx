@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image' // ✅ Tambahkan import
 import { motion } from 'framer-motion'
 import { QrCode, User, Settings, Smartphone } from 'lucide-react'
 
@@ -48,7 +49,13 @@ export default function Home() {
         transition={{ duration: 0.6 }}
       >
         <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <img src="/illustrations/bracelet_demo.svg" alt="QR Bracelet Demo" className="w-full max-w-xs mx-auto" />
+          <Image // ✅ Ganti <img> dengan <Image />
+            src="/illustrations/bracelet_demo.svg"
+            alt="QR Bracelet Demo"
+            width={400}
+            height={400}
+            className="w-full max-w-xs mx-auto"
+          />
           <div>
             <h2 className="text-3xl font-bold mb-4 text-blue-700">Kenalkan Dirimu Dengan Satu Scan</h2>
             <p className="text-gray-700 mb-4">
