@@ -1,16 +1,32 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image' // ✅ Tambahkan import Image
 import { motion } from 'framer-motion'
+
+// Interface untuk data user
+interface UserData {
+  name?: string
+  usia?: string
+  tinggal?: string
+  lahir?: string
+  bio?: string
+  whatsapp?: string
+  instagram?: string
+  tiktok?: string
+  facebook?: string
+  tweet?: string
+  photoURL?: string
+  qrid?: string
+}
 
 export default function Dashboard() {
   const router = useRouter()
-  const [userData, setUserData] = useState<any>(null)
-  const [editableData, setEditableData] = useState<any>({})
+  const [userData, setUserData] = useState<UserData | null>(null)
+  const [editableData, setEditableData] = useState<UserData>({})
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -18,19 +34,15 @@ export default function Dashboard() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) return router.push('/login')
-
       const docRef = doc(db, 'users', user.uid)
       const docSnap = await getDoc(docRef)
-
       if (docSnap.exists()) {
-        const data = docSnap.data()
+        const data = docSnap.data() as UserData
         setUserData(data)
         setEditableData(data)
       }
-
       setLoading(false)
     })
-
     return () => unsubscribe()
   }, [router])
 
@@ -39,11 +51,9 @@ export default function Dashboard() {
   }
 
   const handleImageUpload = (file: File) => {
-    if (!auth.currentUser ) return
-
+    if (!auth.currentUser) return
     setUploading(true)
-
-    const img = new Image()
+    const img = new window.Image()
     const reader = new FileReader()
 
     reader.onload = (e) => {
@@ -53,7 +63,6 @@ export default function Dashboard() {
     img.onload = () => {
       const MAX_SIZE = 300
       let { width, height } = img
-
       if (width > height) {
         if (width > MAX_SIZE) {
           height *= MAX_SIZE / width
@@ -70,10 +79,8 @@ export default function Dashboard() {
       canvas.width = width
       canvas.height = height
       const ctx = canvas.getContext('2d')
-
       ctx?.drawImage(img, 0, 0, width, height)
       const resizedBase64 = canvas.toDataURL('image/jpeg', 0.6)
-
       setEditableData({ ...editableData, photoURL: resizedBase64 })
       setUploading(false)
     }
@@ -87,11 +94,10 @@ export default function Dashboard() {
   }
 
   const handleSave = async () => {
-    if (!auth.currentUser ) return
-
+    if (!auth.currentUser) return
     try {
       setUploading(true)
-      const docRef = doc(db, 'users', auth.currentUser .uid)
+      const docRef = doc(db, 'users', auth.currentUser.uid)
       await setDoc(docRef, editableData, { merge: true })
       alert('Profil berhasil disimpan!')
     } catch (error) {
@@ -108,7 +114,6 @@ export default function Dashboard() {
         Memuat data...
       </div>
     )
-
   if (!userData)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-orange-900 text-white">
@@ -143,7 +148,6 @@ export default function Dashboard() {
       >
         <div className="hand-drawn-border max-w-4xl w-full p-8 space-y-8 font-sans backdrop-blur-md bg-white/10 border border-white/20 shadow-xl rounded-2xl">
           <h1 className="text-3xl font-bold text-center mb-6">Edit Profil</h1>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Foto Profil */}
             <div className="flex flex-col items-center">
@@ -160,9 +164,11 @@ export default function Dashboard() {
               />
               {uploading && <p className="text-xs text-orange-300">Mengunggah foto...</p>}
               {editableData.photoURL && (
-                <img
+                <Image // ✅ Ganti <img> dengan <Image />
                   src={editableData.photoURL}
                   alt="Foto Profil"
+                  width={128}
+                  height={128}
                   className="w-32 h-32 rounded-full object-cover border-2 border-white shadow-lg mt-2"
                 />
               )}
@@ -179,7 +185,6 @@ export default function Dashboard() {
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
                 />
               </div>
-
               <div>
                 <label className="block font-semibold">Usia</label>
                 <input
@@ -189,7 +194,6 @@ export default function Dashboard() {
                   className="w-full px-4 py-2 rounded bg-white/10 border border-white/20 text-white placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
-
               <div>
                 <label className="block font-semibold">Tempat Tinggal</label>
                 <input
@@ -199,7 +203,6 @@ export default function Dashboard() {
                   className="w-full px-4 py-2 rounded bg-white/10 border border-white/20 text-white placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
-
               <div>
                 <label className="block font-semibold">Tanggal Lahir</label>
                 <input
