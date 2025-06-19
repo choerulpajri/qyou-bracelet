@@ -45,7 +45,7 @@ export default function ClaimPage() {
           setUserProfile(userDoc.data() as UserProfile);
         }
         setLoading(false);
-      } catch (_err) {
+      } catch {
         setError('Gagal memeriksa QR ID.');
         setLoading(false);
       }
@@ -84,11 +84,22 @@ export default function ClaimPage() {
 
       // Redirect
       router.push(`/u/${qrid}`);
-    } catch (err: any) {
-      setError(err.message || 'Gagal mendaftar.');
-      setLoading(false);
-    }
+    } catch (err) {
+  if (err instanceof Error) {
+    setError(err.message);
+  } else {
+    setError('Gagal mendaftar.');
+  }
+  setLoading(false);
+}
   };
+
+  // Redirect otomatis jika sudah ada profile
+  useEffect(() => {
+    if (userProfile) {
+      router.push(`/u/${qrid}`);
+    }
+  }, [userProfile, router, qrid]);
 
   if (loading) return <p className="text-center mt-10">Memuat halaman...</p>;
 
@@ -96,38 +107,36 @@ export default function ClaimPage() {
     <main className="container">
       <h1>Klaim QR ID: {qrid}</h1>
 
-      {error && <p className="error">{error}</p>}
-
-      {userProfile ? (
-        router.push(`/u/${qrid}`)
-      ) : (
-        <form onSubmit={handleSubmit} className="form">
-          <input
-            type="text"
-            name="name"
-            placeholder="Nama lengkap"
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            onChange={handleChange}
-            required
-          />
-          <button type="submit" disabled={loading}>
-            Klaim & Daftar
-          </button>
-        </form>
+      {error && (
+        <p style={{ color: 'red', fontSize: '0.875em' }}>{error}</p>
       )}
+
+      <form onSubmit={handleSubmit} className="form">
+        <input
+          type="text"
+          name="name"
+          placeholder="Nama lengkap"
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          onChange={handleChange}
+          required
+        />
+        <button type="submit" disabled={loading}>
+          Klaim & Daftar
+        </button>
+      </form>
     </main>
   );
 }
